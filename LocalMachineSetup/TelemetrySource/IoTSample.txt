@@ -1,0 +1,78 @@
+﻿using MQTTnet;
+using MQTTnet.Client;
+using MQTTnet.Protocol;
+using RabbitMQ.Client;
+using System.Text;
+using System.Threading.Channels;
+
+// Create a connection factory
+var factory = new ConnectionFactory
+{
+    HostName = "localhost",
+    Port = 1883,
+    UserName = "guest",
+    Password = "guest",
+    ClientProvidedName = "device-client-01"
+};
+
+string queueName = "mqtt.topic";
+
+
+// Create an MQTT client
+var mqttFactory = new MqttFactory();
+var mqttClient = mqttFactory.CreateMqttClient();
+
+// Create an options object for the MQTT client
+var mqttOptions = new MqttClientOptionsBuilder()
+    .WithTcpServer(factory.HostName, factory.Port)
+    .WithCredentials(factory.UserName, factory.Password)
+    .WithClientId(factory.ClientProvidedName)
+    .WithCleanSession()
+    .Build();
+
+// Connect to the MQTT broker
+var connectResult = await mqttClient.ConnectAsync(mqttOptions);
+
+// Use the MQTT client to interact with RabbitMQ
+int count = 0;
+
+Task.Factory.StartNew(async () =>
+{
+    await mqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(queueName).Build());
+
+    mqttClient.ApplicationMessageReceivedAsync += MqttClient_ApplicationMessageReceivedAsync;
+});
+Task MqttClient_ApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs e)
+{
+    Console.WriteLine($"Received message[{e.ApplicationMessage.Topic}]: {e.ApplicationMessage.Retain} {Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment)}");
+    return Task.CompletedTask;
+}
+
+while (true)
+{
+    count++;
+    if (count > 10)
+        break;
+
+    var msgStr = $$"""{'Id': 'device-client-01', 'msg': '{{Guid.NewGuid()}}'}""";
+
+    // Publish a message to a topic
+    var message = new MqttApplicationMessageBuilder()
+        .WithTopic(queueName)
+        .WithPayload(msgStr)
+        .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtMostOnce)
+        .WithRetainFlag(true)
+        .Build();
+
+    message.Retain = true;
+
+    Console.WriteLine($"Sending message: {msgStr}");
+    await mqttClient.PublishAsync(message);
+    Thread.Sleep(TimeSpan.FromSeconds(1));
+
+}
+
+Console.Read();
+
+await mqttClient.DisconnectAsync();
+

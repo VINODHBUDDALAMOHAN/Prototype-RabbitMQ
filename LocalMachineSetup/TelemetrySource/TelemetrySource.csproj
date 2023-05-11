@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\ConfigureRabbitMQ\Configurations.cs" Link="Configurations.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MQTTnet" Version="4.2.0.706" />
     <PackageReference Include="RabbitMQ.Client" Version="6.5.0" />
   </ItemGroup>

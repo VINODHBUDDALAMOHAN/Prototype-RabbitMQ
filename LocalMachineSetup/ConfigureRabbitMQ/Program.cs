@@ -14,28 +14,53 @@ class Program
     private static IModel? _model;
     static void Main()
     {
-        CreateConnection();
+        CreateLocalMachineConfiguration();
+        CreateServerConfiguration();
     }
 
-    private static void CreateConnection()
+    private static void CreateLocalMachineConfiguration()
     {
         // TODO pull out all hardcoded values in json files
         // TODO password shall be provided as command line parameters or vault
-        _factory = new ConnectionFactory { HostName = "localhost", UserName = "guest", Password = "guest", Port = 5672 };
-        _connection = _factory.CreateConnection();
-        _model = _connection.CreateModel();
+        var factory = new ConnectionFactory { HostName = "localhost", UserName = "guest", Password = "guest", Port = 5672 };
+        var connection = factory.CreateConnection();
+        var model = connection.CreateModel();
 
         foreach (var exchange in Configurations.ExchangeConfigurations)
         {
             // Create exchange
-            _model.ExchangeDeclare(exchange.ExchangeName, "fanout", true, false);
+            model.ExchangeDeclare(exchange.ExchangeName, "fanout", true, false);
             Console.WriteLine($"Created Exchange {exchange.ExchangeName}");
 
             // Create all queues and exchange bindings
             foreach (var q in exchange.Queues)
             {
-                var queueName = _model.QueueDeclare(q, true, false, false, null).QueueName;
-                _model.QueueBind(queueName, exchange.ExchangeName, "");
+                var queueName = model.QueueDeclare(q, true, false, false, null).QueueName;
+                model.QueueBind(queueName, exchange.ExchangeName, "");
+                Console.WriteLine($"Created Queue  {exchange.ExchangeName}:{q}");
+            }
+        }
+    }
+
+    private static void CreateServerConfiguration()
+    {
+        // TODO pull out all hardcoded values in json files
+        // TODO password shall be provided as command line parameters or vault
+        var factory = new ConnectionFactory { HostName = "vm-az220-training-gw0002-vinuaz2202.eastus.cloudapp.azure.com", UserName = "guest", Password = "guest", Port = 5672 };
+        var connection = factory.CreateConnection();
+        var model = connection.CreateModel();
+
+        foreach (var exchange in Configurations.ExchangeConfigurations)
+        {
+            // Create exchange
+            model.ExchangeDeclare(exchange.ExchangeName, "fanout", true, false);
+            Console.WriteLine($"Created Exchange {exchange.ExchangeName}");
+
+            // Create all queues and exchange bindings
+            foreach (var q in exchange.Queues)
+            {
+                var queueName = model.QueueDeclare(q, true, false, false, null).QueueName;
+                model.QueueBind(queueName, exchange.ExchangeName, "");
                 Console.WriteLine($"Created Queue  {exchange.ExchangeName}:{q}");
             }
         }

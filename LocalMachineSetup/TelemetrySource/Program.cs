@@ -1,5 +1,8 @@
 ﻿
 using ConfigureRabbitMQ;
+using MQTTnet.Client;
+using MQTTnet.Protocol;
+using MQTTnet;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
@@ -41,3 +44,53 @@ class Program
     }
 
 }
+
+//MQTTCODE
+//using System;
+//using System.Text;
+//using MQTTnet;
+//using MQTTnet.Client;
+//using MQTTnet.Client.Options;
+
+//namespace IoTSensorApplication
+//{
+//    class Program
+//    {
+//        static async System.Threading.Tasks.Task Main()
+//        {
+//            var factory = new MqttFactory();
+//            var mqttClient = factory.CreateMqttClient();
+
+//            var options = new MqttClientOptionsBuilder()
+//                .WithTcpServer("localhost", 1883)
+//                .WithCredentials("guest", "guest")
+//                .Build();
+
+//            await mqttClient.ConnectAsync(options);
+
+//            int i = 0;
+//            while (i < 10)
+//            {
+//                i++;
+//                SendMessage(mqttClient, $"{{'Id': 'device-client-01', 'msg': '{i}-{Guid.NewGuid()}'}}");
+//            }
+
+//            Console.ReadKey();
+
+//            await mqttClient.DisconnectAsync();
+//        }
+
+//        private static void SendMessage(IMqttClient mqttClient, string message)
+//        {
+//            var messagePayload = new MqttApplicationMessageBuilder()
+//                .WithTopic(Configurations.AcquitionExchange_Exchange.ExchangeName)
+//                .WithPayload(message)
+//                .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
+//                .Build();
+
+//            mqttClient.PublishAsync(messagePayload).Wait();
+
+//            Console.WriteLine($"Sent {message}");
+//        }
+//    }
+//}

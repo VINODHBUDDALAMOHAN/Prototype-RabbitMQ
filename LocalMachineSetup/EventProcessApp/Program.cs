@@ -36,3 +36,55 @@ class Program
         }
     }
 }
+//COde for MQTT
+
+//using MQTTnet;
+//using MQTTnet.Client;
+//using MQTTnet.Client.Options;
+//using MQTTnet.Client.Subscribing;
+//using MQTTnet.Extensions.ManagedClient;
+//using System;
+//using System.Text;
+//using System.Threading;
+//using System.Threading.Tasks;
+
+//namespace EventProcessApp
+//{
+//    class Program
+//    {
+//        static async Task Main()
+//        {
+//            var options = new MqttClientOptionsBuilder()
+//                .WithTcpServer("localhost", 1883)
+//                .WithCredentials("guest", "guest")
+//                .Build();
+
+//            var factory = new MqttFactory();
+//            var mqttClient = factory.CreateMqttClient();
+
+//            var topics = new TopicFilterBuilder().WithTopic(Configurations.AnalyticsQueue).Build();
+//            var subscriptions = new MqttClientSubscribeOptionsBuilder()
+//                .WithTopicFilter(topics)
+//                .Build();
+
+//            mqttClient.UseConnectedHandler(async e =>
+//            {
+//                Console.WriteLine($"Listening at {Configurations.AnalyticsQueue}");
+//                await mqttClient.SubscribeAsync(subscriptions);
+//            });
+
+//            mqttClient.UseApplicationMessageReceivedHandler(e =>
+//            {
+//                Console.WriteLine($"Received {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}");
+//                Thread.Sleep(TimeSpan.FromSeconds(1));
+//                Console.WriteLine($"Processed {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}");
+//            });
+
+//            await mqttClient.ConnectAsync(options);
+//            Console.ReadKey();
+
+//            await mqttClient.DisconnectAsync();
+//        }
+//    }
+//}
+

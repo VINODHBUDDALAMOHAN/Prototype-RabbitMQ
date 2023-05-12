@@ -16,30 +16,45 @@ class Program
     private static IConnection? _connection;
     private static IModel? _model;
 
+    //This code creates a connection and sends a message 10 times.
     static void Main()
     {
+        //Create a connection
         CreateConnection();
+        //Initialize a counter
         int i = 0;
+        //Loop 10 times
         while (i < 10)
         {
+            //Increment the counter
             i++;
+            //Send a message with the counter and a new GUID
             SendMessage($$"""{'Id': 'device-client-01', 'msg': '{{i}}-{{Guid.NewGuid()}}'}""");
         }
     }
-
+    //This code creates a connection to a RabbitMQ server.
     private static void CreateConnection()
     {
-        _factory = new ConnectionFactory { HostName = "localhost", UserName = "guest", Password = "guest", Port = 5672  };
+        //Create a new ConnectionFactory object with the necessary parameters
+        _factory = new ConnectionFactory { HostName = "localhost", UserName = "guest", Password = "guest", Port = 5672 };
+
+        //Create a connection using the ConnectionFactory
         _connection = _factory.CreateConnection();
+
+        //Create a model using the connection
         _model = _connection.CreateModel();
-        //_model.ExchangeDeclare(Configurations.AcquitionExchange_Exchange.ExchangeName, "fanout", true, false);
     }
 
+    //This code sends a message to a RabbitMQ exchange
     private static void SendMessage(string message)
     {
+        //Create a basic properties object
         var basicProperties = _model.CreateBasicProperties();
+        //Set the message to be persistent
         basicProperties.Persistent = true;
+        //Publish the message to the exchange
         _model.BasicPublish(Configurations.AcquitionExchange_Exchange.ExchangeName, "", basicProperties, Encoding.UTF8.GetBytes(message));
+        //Print out the message that was sent
         Console.WriteLine($"Sent {message}");
     }
 

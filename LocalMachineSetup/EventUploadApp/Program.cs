@@ -15,17 +15,26 @@ class Program
 
     private const string ExchangeName = "PublishSubscribe_Exchange";
 
+    // Rewritten code with comments
+
     static void Main()
     {
+        // Create a new connection factory with the given hostname, username, and password
         _factory = new ConnectionFactory { HostName = "localhost", UserName = "guest", Password = "guest" };
+        // Create a new connection using the connection factory
         using (_connection = _factory.CreateConnection())
         {
+            // Create a new channel using the connection
             using (var channel = _connection.CreateModel())
             {
+                // Declare and bind a queue to an exchange using the given configurations
                 var (queueName, _consumer) = QueueBinding.DeclareAndBindQueueToExchange(channel, Configurations.UpstreamQueue, Configurations.AcquitionExchange_Exchange.ExchangeName);
 
+                // Set the acknowledgement to true
                 var ack = true;
+                // Print out the queue name
                 Console.WriteLine($"Listening at {queueName}");
+                // When a message is received, print out the message, wait for 1 second, and then acknowledge the message
                 _consumer!.Received += (model, ea) =>
                 {
                     Console.WriteLine($"Received {Encoding.UTF8.GetString(ea.Body.ToArray())}");
@@ -35,7 +44,9 @@ class Program
                     ack = !ack;
                 };
 
+                // Consume the queue
                 channel.BasicConsume(queueName, false, _consumer);
+                // Wait for user input
                 Console.ReadKey();
             }
         }

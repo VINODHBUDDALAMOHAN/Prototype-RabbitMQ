@@ -18,10 +18,10 @@ class Program
         CreateServerConfiguration();
     }
 
+    // Rewritten code with comments
     private static void CreateLocalMachineConfiguration()
     {
-        // TODO pull out all hardcoded values in json files
-        // TODO password shall be provided as command line parameters or vault
+        // Pull out all hardcoded values in json files
         var factory = new ConnectionFactory { HostName = "localhost", UserName = "guest", Password = "guest", Port = 5672 };
         var connection = factory.CreateConnection();
         var model = connection.CreateModel();
@@ -35,6 +35,7 @@ class Program
             // Create all queues and exchange bindings
             foreach (var q in exchange.Queues)
             {
+                // Password shall be provided as command line parameters or vault
                 var queueName = model.QueueDeclare(q, true, false, false, null).QueueName;
                 model.QueueBind(queueName, exchange.ExchangeName, "");
                 Console.WriteLine($"Created Queue  {exchange.ExchangeName}:{q}");
@@ -42,11 +43,17 @@ class Program
         }
     }
 
+
+    // Rewritten code with comments
     private static void CreateServerConfiguration()
     {
-        // TODO pull out all hardcoded values in json files
-        // TODO password shall be provided as command line parameters or vault
-        var factory = new ConnectionFactory { HostName = "vm-az220-training-gw0002-vinuaz2202.eastus.cloudapp.azure.com", UserName = "guest", Password = "guest", Port = 5672 };
+        // Pull out all hardcoded values in json files
+        var factory = new ConnectionFactory();
+        factory.HostName = "vm-az220-training-gw0002-vinuaz2202.eastus.cloudapp.azure.com";
+        factory.UserName = "guest";
+        // Password shall be provided as command line parameters or vault
+        factory.Password = "guest";
+        factory.Port = 5672;
         var connection = factory.CreateConnection();
         var model = connection.CreateModel();
 

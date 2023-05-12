@@ -13,24 +13,37 @@ class Program
     private static IConnection? _connection;
     private static EventingBasicConsumer? _consumer;
 
+    // Rewritten code with comments
+
     static void Main()
     {
+        // Create a new connection factory with the given hostname, username, and password
         _factory = new ConnectionFactory { HostName = "localhost", UserName = "guest", Password = "guest" };
+        // Create a new connection using the connection factory
         using (_connection = _factory.CreateConnection())
         {
+            // Create a new channel using the connection
             using (var channel = _connection.CreateModel())
             {
+                // Declare and bind a queue to an exchange using the given configurations
                 var (queueName, _consumer) = QueueBinding.DeclareAndBindQueueToExchange(channel, Configurations.AnalyticsQueue, Configurations.AcquitionExchange_Exchange.ExchangeName);
 
+                // Print the queue name
                 Console.WriteLine($"Listening at {queueName}");
+                // Add an event handler for when a message is received
                 _consumer!.Received += (model, ea) =>
                 {
+                    // Print the received message
                     Console.WriteLine($"Received {Encoding.UTF8.GetString(ea.Body.ToArray())}");
+                    // Sleep for 1 second
                     Thread.Sleep(TimeSpan.FromSeconds(1));
+                    // Print the processed message
                     Console.WriteLine($"Processed {Encoding.UTF8.GetString(ea.Body.ToArray())}");
                 };
 
+                // Consume the queue with the given consumer
                 channel.BasicConsume(queueName, true, _consumer);
+                // Wait for user input
                 Console.ReadKey();
             }
         }
